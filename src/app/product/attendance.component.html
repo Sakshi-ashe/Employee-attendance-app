@@ -1,0 +1,146 @@
+<app-header pageTitle="Attendance" imageUrl="fingerprint"></app-header>
+<mat-tab-group (selectedTabChange)="onTabClick($event)">
+    <mat-tab label="GPS Attendance">
+        <mat-card>
+            <mat-card-content *ngIf="!attendanceSaved else showAttendnaceSaved">
+                <button type="submit" (click)="setAttendance();" mat-raised-button color="primary">Submit
+                    GPS Attendance</button>
+                <br><br><br>
+                <b>userId:</b><span class="med-spacer"></span> {{ userData.email }}<br />
+                <b>Dttm :</b><span class="med-spacer"></span> {{ userData.dttm }}<br />
+                <b>GPS :</b><span class="med-spacer"></span>
+                <div *ngIf="userData.gpsLoc.lat else showNoGPSButton">
+                    <button mat-icon-button (click)="showCurrentLocation = !showCurrentLocation;">
+                        <mat-icon color="primary">track_changes</mat-icon>
+                    </button><br />
+                </div>
+                <ng-template #showNoGPSButton>
+                    <span class="label-error">
+                        <mat-icon>gps_off</mat-icon>
+                        Please enable location services on your mobile device and restart/reload this app.
+                    </span>
+                </ng-template>
+                <div *ngIf="showCurrentLocation">
+                    <div *ngIf="userData.gpsLoc.lat && userData.gpsLoc.lng else showNoLocation"
+                        class='agm-map-container-inner'>
+                        <span class="med-spacer"></span>
+                        <span class="med-spacer"></span>
+                        <span matTooltip="Close">
+                            <mat-icon color="primary" (click)="showCurrentLocation = !showCurrentLocation;">clear
+                            </mat-icon>
+                        </span>
+                        <agm-map [latitude]="userData.gpsLoc.lat" [longitude]="userData.gpsLoc.lng" [zoom]='15'>
+                            <agm-marker [latitude]="userData.gpsLoc.lat" [longitude]="userData.gpsLoc.lng">
+                                <agm-info-window>
+                                    <h3><strong>Welcome!</strong></h3>
+                                    <p>You are here!</p>
+                                </agm-info-window>
+                            </agm-marker>
+                        </agm-map>
+                    </div>
+                </div>
+                <ng-template #showNoLocation>
+                    <span class="label-error">
+                        <mat-icon>gps_off</mat-icon>
+                        Please enable location services on your mobile device and restart/reload this app.
+                    </span>
+                </ng-template>
+            </mat-card-content>
+            <ng-template #showAttendnaceSaved>
+                <span class="label-error">GPS Location Attendance is saved. For Picture Attendance and past results,
+                    visit History tab.</span><br><br><br>
+                <button mat-raised-button color="primary" (click)="attendanceSaved = false;">Close</button>
+            </ng-template>
+        </mat-card>
+    </mat-tab>
+    <mat-tab label="History">
+        <mat-form-field>
+            <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+        </mat-form-field>
+        <div *ngIf="showFileUpload">
+                <span matTooltip="Close">
+                        <mat-icon color="primary" (click)="showFileUpload = !showFileUpload;">clear
+                        </mat-icon>
+                    </span>
+                    <br/>
+                <app-fileupload fileUrl="attendance" docId="{{ this.attendanceDocId }}"></app-fileupload>
+        </div>
+        <div *ngIf="showPic">
+                <span matTooltip="Close">
+                        <mat-icon color="primary" (click)="showPic = !showPic;">clear
+                        </mat-icon>
+                    </span>
+                    <br/>
+                <img src="{{this.picUrl}}" width="100" height="100">
+        </div>
+        <div *ngIf="showHistLocation">
+            <div *ngIf="histLat && histLng" class='agm-map-container-inner'>
+                <span class="med-spacer"></span>
+                <span class="med-spacer"></span>
+                <span matTooltip="Close">
+                    <mat-icon color="primary" (click)="showHistLocation = !showHistLocation;">clear
+                    </mat-icon>
+                </span>
+                <agm-map [latitude]="histLat" [longitude]="histLng" [zoom]='15'>
+                    <agm-marker [latitude]="histLat" [longitude]="histLng">
+                        <agm-info-window>
+                            <h3><strong>Welcome!</strong></h3>
+                            <p>You are here!</p>
+                        </agm-info-window>
+                    </agm-marker>
+                </agm-map>
+            </div>
+        </div>
+        <div class="mat-elevation-z8">
+            <table mat-table [dataSource]="dataSource" matSort>
+
+                <ng-container matColumnDef="createdAt">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Dttm </th>
+                    <td mat-cell *matCellDef="let row">
+                        {{ row.createdAt.toDate() | date:'medium' }} &nbsp;&nbsp;&nbsp;
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="data">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> email </th>
+                    <td mat-cell *matCellDef="let row">{{row.data.email}} <button mat-icon-button
+                            (click)="histLat=row.data.gpsLoc.lat;histLng=row.data.gpsLoc.lng;showHistLocation = !showHistLocation;">
+                            <mat-icon color="primary">track_changes</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Action </th>
+                    <td mat-cell *matCellDef="let row"> <button mat-icon-button color="warn"
+                            (click)="deleteAttendance(row.id)">
+                            <mat-icon>delete</mat-icon>
+                        </button> </td>
+                </ng-container>
+                <ng-container matColumnDef="path">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Picture Attendance </th>
+                    <td mat-cell *matCellDef="let row">
+                        <div *ngIf="row.path !=='NA' else uploadPic">
+                            <button mat-icon-button color="primary" (click)="this.picUrl=row.path;showPic=!showPic;">
+                                <mat-icon>camera_roll</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" (click)="this.attendanceDocId=row.id;showFileUpload=!showFileUpload;">
+                                <mat-icon>photo_camera</mat-icon>
+                            </button>
+                        </div>
+                        <ng-template #uploadPic>
+                            <button mat-icon-button color="warn" (click)="this.attendanceDocId=row.id;showFileUpload=!showFileUpload;">
+                                <mat-icon>photo_camera</mat-icon>
+                            </button>
+                        </ng-template>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;">
+                </tr>
+            </table>
+
+            <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+
+    </mat-tab>
+</mat-tab-group>
