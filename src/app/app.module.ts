@@ -24,30 +24,6 @@ import { FileSizePipe } from './shared/Drop/filesize.pipe';
 import { FileUploadComponent } from './shared/Drop/fileupload/fileupload.component';
 
 
-//for social login
-import {
-  SocialLoginModule,
-  AuthServiceConfig,
-  GoogleLoginProvider,
-  FacebookLoginProvider,
-} from "angular-6-social-login";
-
-export function getAuthServiceConfigs() {
-  let config = new AuthServiceConfig(
-      [
-        {
-          id: FacebookLoginProvider.PROVIDER_ID,
-          provider: new FacebookLoginProvider("1124464631080451")
-        },
-        {
-          id: GoogleLoginProvider.PROVIDER_ID,
-          provider: new GoogleLoginProvider("sakshi.17gupta1998@gmail.com")
-        }
-      ]
-  )
-  return config;
-}
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -57,9 +33,6 @@ export function getAuthServiceConfigs() {
     AboutusComponent,
     LoginComponent,
     SignupComponent,
-    FileUploadComponent,
-    DropZoneDirective,
-    FileSizePipe,
     FileUploadComponent,
     
   ],
