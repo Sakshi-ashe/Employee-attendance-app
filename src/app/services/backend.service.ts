@@ -3,12 +3,9 @@ import { AngularFireAuth , } from '@angular/fire/auth';
 import { AngularFirestore, AngularFirestoreDocument  } from '@angular/fire/firestore';
 import { auth } from 'firebase/app';
 import { environment } from '../../environments/environment';
-import { Observable } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
+
 import {
-    AuthService,
-    FacebookLoginProvider,
-    GoogleLoginProvider
+    AuthService
   } from 'angular-6-social-login';
   
 
@@ -18,17 +15,12 @@ import {
 export class BackendService {
 
     constructor(public afAuth: AngularFireAuth, private _afs: AngularFirestore) { }
-    // login page - login with FB/GOOGLE/EMAIL, if formData is passed, this means is user is using email/password login
+    
     login(loginType, formData?) {
-        let socialPlatformProvider;
-        if (formData) {
+        
+        if (formData) 
             return this.afAuth.auth.signInWithEmailAndPassword(formData.email, formData.password);
-        } else {
-            let loginMethod;
-            if (loginType === 'FB') { loginMethod = new auth.FacebookAuthProvider(); }
-            if (loginType === 'GOOGLE') { loginMethod = new auth.GoogleAuthProvider(); }
-
-            return this.afAuth.auth.signInWithRedirect(loginMethod)
+        
         }
     
     }
@@ -38,12 +30,9 @@ export class BackendService {
         return this.afAuth.auth.getRedirectResult();
     }
     createUser(formData) {
-        if (environment.database === 'firebase') {
             return this.afAuth.auth.createUserWithEmailAndPassword(formData.value.email, formData.value.password);
         }
-        if (environment.database === 'SQL') {
-            // need to call SQL API here if a SQL Database is used
-        }
+       
     }
 
     //getuser method check if user is authenticated or not
@@ -93,10 +82,10 @@ export class BackendService {
     deleteAttendance(docId) {
         this._afs.collection('attendance').doc(docId).delete();
     }
-    // helper functions // get local or serverTimestamp
+    // get local or serverTimestamp
     get timestamp() {
         const d = new Date();
         return d;
-        // return firebase.firestore.FieldValue.serverTimestamp();
+        
     }
 }
