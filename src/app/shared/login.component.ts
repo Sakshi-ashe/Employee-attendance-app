@@ -9,7 +9,7 @@ import { BackendService } from '../services/backend.service';
   templateUrl: './login.component.html'
 })
 export class LoginComponent implements OnInit, AfterViewInit {
-  socialAuth: boolean = true; // show Google and FB Sign in only when social auth is enabled
+ 
   error: any;
   dataLoading: boolean = false;
   brokenNetwork = false;
@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
    }
 
   ngOnInit() {
-    this.socialAuth = environment.socialAuthEnabled;
+    
   }
   ngAfterViewInit() {
     if (!localStorage.getItem("uid")) {
